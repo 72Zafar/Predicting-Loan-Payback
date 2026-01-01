@@ -1,0 +1,31 @@
+columns:
+  - id
+  - annual_income
+  - debt_to_income_ratio
+  - credit_score
+  - loan_amount
+  - interest_rate
+  - gender
+  - marital_status
+  - education_level
+  - employment_status
+  - loan_purpose
+  - grade_subgrade
+  - loan_paid_back
+
+numerical_columns:
+  - annual_income
+  - debt_to_income_ratio
+  - credit_score
+  - loan_amount
+  - interest_rate
+  - loan_paid_back
+
+calegorical_columns:
+  - id
+  - gender
+  - marital_status
+  - education_level
+  - employment_status
+  - loan_purpose
+  - grade_subgrade
