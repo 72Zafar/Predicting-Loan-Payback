@@ -108,3 +108,127 @@ class SimpleStorageService:
             return file_object
         except Exception as e:
             raise MyException(e,sys)
+        
+        
+    def load_model(self, model_name: str, bucket_name: str, model_dir: str = None) -> object:
+        """
+        Loads a serialized model from the specified S3 bucket.
+
+        Args:
+            model_name (str): Name of the model file in the bucket.
+            bucket_name (str): Name of the S3 bucket.
+            model_dir (str): Directory path within the bucket.
+
+        Returns:
+            object: The deserialized model object.
+        """
+        try:
+            model_file = model_dir + "/" + model_name if model_dir else model_name
+            file_object = self.get_file_object(model_file, bucket_name)
+            model_obj = self.read_object(file_object, decode=False)
+            model = pickle.loads(model_obj)
+            logging.info("Production model loaded from S3 bucket.")
+            return model
+        except Exception as e:
+            raise MyException(e, sys) from e
+
+    def create_folder(self, folder_name: str, bucket_name: str) -> None:
+        """
+        Creates a folder in the specified S3 bucket.
+
+        Args:
+            folder_name (str): Name of the folder to create.
+            bucket_name (str): Name of the S3 bucket.
+        """
+        logging.info("Entered the create_folder method of SimpleStorageService class")
+        try:
+            # Check if folder exists by attempting to load it
+            self.s3_resource.Object(bucket_name, folder_name).load()
+        except ClientError as e:
+            # If folder does not exist, create it
+            if e.response["Error"]["Code"] == "404":
+                folder_obj = folder_name + "/"
+                self.s3_client.put_object(Bucket=bucket_name, Key=folder_obj)
+            logging.info("Exited the create_folder method of SimpleStorageService class")
+
+    def upload_file(self, from_filename: str, to_filename: str, bucket_name: str, remove: bool = True):
+        """
+        Uploads a local file to the specified S3 bucket with an optional file deletion.
+
+        Args:
+            from_filename (str): Path of the local file.
+            to_filename (str): Target file path in the bucket.
+            bucket_name (str): Name of the S3 bucket.
+            remove (bool): If True, deletes the local file after upload.
+        """
+        logging.info("Entered the upload_file method of SimpleStorageService class")
+        try:
+            logging.info(f"Uploading {from_filename} to {to_filename} in {bucket_name}")
+            self.s3_resource.meta.client.upload_file(from_filename, bucket_name, to_filename)
+            logging.info(f"Uploaded {from_filename} to {to_filename} in {bucket_name}")
+
+            # Delete the local file if remove is True
+            if remove:
+                os.remove(from_filename)
+                logging.info(f"Removed local file {from_filename} after upload")
+            logging.info("Exited the upload_file method of SimpleStorageService class")
+        except Exception as e:
+            raise MyException(e, sys) from e
+
+    def upload_df_as_csv(self, data_frame: DataFrame, local_filename: str, bucket_filename: str, bucket_name: str) -> None:
+        """
+        Uploads a DataFrame as a CSV file to the specified S3 bucket.
+
+        Args:
+            data_frame (DataFrame): DataFrame to be uploaded.
+            local_filename (str): Temporary local filename for the DataFrame.
+            bucket_filename (str): Target filename in the bucket.
+            bucket_name (str): Name of the S3 bucket.
+        """
+        logging.info("Entered the upload_df_as_csv method of SimpleStorageService class")
+        try:
+            # Save DataFrame to CSV locally and then upload it
+            data_frame.to_csv(local_filename, index=None, header=True)
+            self.upload_file(local_filename, bucket_filename, bucket_name)
+            logging.info("Exited the upload_df_as_csv method of SimpleStorageService class")
+        except Exception as e:
+            raise MyException(e, sys) from e
+
+    def get_df_from_object(self, object_: object) -> DataFrame:
+        """
+        Converts an S3 object to a DataFrame.
+
+        Args:
+            object_ (object): The S3 object.
+
+        Returns:
+            DataFrame: DataFrame created from the object content.
+        """
+        logging.info("Entered the get_df_from_object method of SimpleStorageService class")
+        try:
+            content = self.read_object(object_, make_readable=True)
+            df = read_csv(content, na_values="na")
+            logging.info("Exited the get_df_from_object method of SimpleStorageService class")
+            return df
+        except Exception as e:
+            raise MyException(e, sys) from e
+
+    def read_csv(self, filename: str, bucket_name: str) -> DataFrame:
+        """
+        Reads a CSV file from the specified S3 bucket and converts it to a DataFrame.
+
+        Args:
+            filename (str): The name of the file in the bucket.
+            bucket_name (str): The name of the S3 bucket.
+
+        Returns:
+            DataFrame: DataFrame created from the CSV file.
+        """
+        logging.info("Entered the read_csv method of SimpleStorageService class")
+        try:
+            csv_obj = self.get_file_object(filename, bucket_name)
+            df = self.get_df_from_object(csv_obj)
+            logging.info("Exited the read_csv method of SimpleStorageService class")
+            return df
+        except Exception as e:
+            raise MyException(e, sys) from e
