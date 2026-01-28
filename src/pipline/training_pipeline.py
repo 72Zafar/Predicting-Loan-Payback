@@ -78,9 +78,7 @@ class TrainingPipeline:
             return model_trainer_artifact
         except Exception as e:
             raise MyException(e, sys)
-
-
-
+        
 
     def run_pipeline(self,)-> None:
         """

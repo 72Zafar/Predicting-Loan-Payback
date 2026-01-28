@@ -5,7 +5,7 @@ import sys
 from pandas import DataFrame
 
 
-class proj1Estimatoe:
+class proj1Estimator:
     """
     This class is used to save and retriene our model from s3 bucket and to do prediction
     """
