@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 class BlendedEnsembleModel:
     def __init__(
@@ -17,8 +18,36 @@ class BlendedEnsembleModel:
         self.blend_weights = blend_weights
         self.threshold = threshold
 
+    def _preprocess_data(self, X):
+        """
+        Apply preprocessing to input data.
+        Handles both dict-based preprocessing object and sklearn pipeline.
+        Assumes X is already preprocessed (numeric, categorical encoded, etc.)
+        when using the preprocessed test data from model evaluation.
+        """
+        if isinstance(X, np.ndarray):
+            # Data is already preprocessed (from numpy array)
+            return X
+        
+        if isinstance(self.preprocessing_object, dict):
+            # Handle dictionary-based preprocessing
+            if isinstance(X, pd.DataFrame):
+                X = X.copy()
+            else:
+                X = pd.DataFrame(X, columns=self.preprocessing_object.get("feature_columns", None))
+            
+            # Apply scaler if available
+            if "scaler" in self.preprocessing_object:
+                scaler = self.preprocessing_object["scaler"]
+                X = scaler.transform(X)
+            
+            return X
+        else:
+            # Handle sklearn pipeline or object with transform method
+            return self.preprocessing_object.transform(X)
+
     def predict_proba(self, X):
-        X = self.preprocessing_object.transform(X)
+        X = self._preprocess_data(X)
 
         lgb_pred = self.lgb_model.predict_proba(X)[:, 1]
         cat_pred = self.cat_model.predict_proba(X)[:, 1]

@@ -1,6 +1,6 @@
 from src.cloud_storage.aws_storage import SimpleStorageService
 from src.exception import MyException
-from src.entity.estimator import MyModel
+from src.entity.estimator import BlendedEnsembleModel
 import sys
 from pandas import DataFrame
 
@@ -18,7 +18,7 @@ class proj1Estimator:
         self.bucket_name = bucket_name
         self.s3 = SimpleStorageService()
         self.model_path = model_path
-        self.loaded_model: MyModel = None
+        self.loaded_model: BlendedEnsembleModel = None
 
     
     def is_model_present(self, model_path):
@@ -28,7 +28,7 @@ class proj1Estimator:
             print(e)
             return False
         
-    def load_model(self,)-> MyModel:
+    def load_model(self,)->BlendedEnsembleModel:
         """
         Load the model from the model_path
         :return:

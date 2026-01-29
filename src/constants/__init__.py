@@ -63,7 +63,7 @@ MODEL_TRAINER_EXPECTED_SCORE : float = 0.7
 LGBM_OBJECTIVE: str = "binary"
 LGBM_METRIC: str = "auc"
 LGBM_BOSSTING_TYPE: str = "gbdt"
-LGBM_N_ESTIMATORS: int = 1000
+LGBM_N_ESTIMATORS: int = 10  # Actual values is 1000
 LGBM_LEARNING_RATE: float = 0.01
 LGBM_COLSAMPLE_FREQ: int = 1
 LGBM_MIN_CHILD_SAMPLES: int = 20
@@ -75,7 +75,7 @@ LGMB_DEVICE: str = "cpu"
 LGMB_VERBOSE: int = -1
 
 """ CatBoost model parameters """
-CAT_ITERATIONS: int = 3000
+CAT_ITERATIONS: int = 15 # Actual values is 3000
 CAT_DEPTHE: int = 8
 CAT_LOSS_FUNCTION: str = "Logloss"
 CAT_EVAL_METRIC: str = "AUC"
@@ -94,7 +94,7 @@ XGB_COLSAMPLE_BYTREE: float = 0.3
 XGB_SUBSAMPLE: float = 0.6
 XGB_REG_ALPHA: float = 0.5
 XGB_REG_LAMBDA: float = 2.0
-XGB_N_ESTIMATORS: int = 10000
+XGB_N_ESTIMATORS: int = 10  # Actual values is 10000
 XGB_RANDOM_STATE: int = 42
 XGB_N_JOBS: int = -1
 XGB_VERBOSE: int = -1

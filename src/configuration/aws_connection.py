@@ -5,13 +5,13 @@ from src.constants import AWS_ACCESS_KEY_ID_ENV_KEY, AWS_SECRET_ACCESS_KEY_ENV_K
 class S3client:
     
     s3_client = None
-    s3_resourse = None
+    s3_resource = None
 
     def __init__(self, region_name = REGION_NAME):
         """
         This class gets aws credentials from env_varible and creates an connection s2 bucket and raise exception when environment variable is not set 
         """
-        if S3client.s3_resourse == None or S3client.s3_client == None:
+        if S3client.s3_resource == None or S3client.s3_client == None:
             __access_key_id = os.getenv(AWS_ACCESS_KEY_ID_ENV_KEY)
             __secret_access_key = os.getenv(AWS_SECRET_ACCESS_KEY_ENV_KEY)
             if __access_key_id is None:
@@ -19,7 +19,7 @@ class S3client:
             if __secret_access_key is None:
                 raise Exception(f"Environment variable '{AWS_SECRET_ACCESS_KEY_ENV_KEY}' not set.")
             
-            S3client.s3_resourse = boto3.resource(
+            S3client.s3_resource = boto3.resource(
                 "s3",
                 aws_access_key_id = __access_key_id,
                 aws_secret_access_key = __secret_access_key,
@@ -33,5 +33,5 @@ class S3client:
                 region_name = region_name
             )
 
-            self.s3_client = S3client.s3_resourse
-            self.s3_resourse = S3client.s3_client
+            self.s3_resource = S3client.s3_resource
+            self.s3_client = S3client.s3_client

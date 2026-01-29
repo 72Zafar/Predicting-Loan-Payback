@@ -81,7 +81,7 @@ class TrainingPipeline:
         except Exception as e:
             raise MyException(e, sys)
         
-    def start_model_evaluation(self,data_ingestion_artifact:DataIngestionArtifact, model_trainer_artifact:ModelTrainerArtifact)-> ModelEvaluationArtifact:
+    def start_model_evaluation(self, data_ingestion_artifact: DataIngestionArtifact, model_trainer_artifact: ModelTrainerArtifact, data_transformation_artifact: DataTransformationArtifact)-> ModelEvaluationArtifact:
         """
         This method of TrainingPipeline class is responsible for starting model evaluation component
         """
@@ -89,7 +89,8 @@ class TrainingPipeline:
             model_evaluation = ModelEvaluation(
                 model_eval_config=self.model_evaluation_config,
                 data_ingestion_artifact=data_ingestion_artifact,
-                model_trainer_artifact=model_trainer_artifact
+                model_trainer_artifact=model_trainer_artifact,
+                data_transformation_artifact=data_transformation_artifact
             )
             
             model_evaluation_artifact = model_evaluation.initiate_model_evaluation()
@@ -107,9 +108,9 @@ class TrainingPipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(data_ingestion_artifact=data_ingestion_artifact,data_validation_artifact=data_validation_artifact)
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
-            model_evaluation_artifact = self.start_model_evaluation(data_ingestion_artifact=data_ingestion_artifact, model_trainer_artifact=model_trainer_artifact)
-            if not model_trainer_artifact.is_model_accepted:
-                logging.info("Model not accepted")
-                return None
+            model_evaluation_artifact = self.start_model_evaluation(data_ingestion_artifact=data_ingestion_artifact, model_trainer_artifact=model_trainer_artifact, data_transformation_artifact=data_transformation_artifact)
+            # if not model_trainer_artifact.is_model_accepted:
+            #     logging.info("Model not accepted")
+            #     return None
         except Exception as e:
             raise MyException(e, sys)
