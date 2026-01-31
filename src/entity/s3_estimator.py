@@ -64,3 +64,16 @@ class proj1Estimator:
             return self.loaded_model.predict(dataframe=dataframe)
         except Exception as e:
             raise MyException(e, sys)
+        
+    def predict_proba(self, X):
+        """
+        Predict probability estimates for samples in X
+        :param X: Input features (numpy array or DataFrame)
+        :return: Probability predictions
+        """
+        try:
+            if self.loaded_model is None:
+                self.loaded_model = self.load_model()
+            return self.loaded_model.predict_proba(X)
+        except Exception as e:
+            raise MyException(e, sys)
