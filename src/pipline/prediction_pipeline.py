@@ -6,7 +6,7 @@ from src.entity.s3_estimator import proj1Estimator
 from pandas import DataFrame
 
 
-class LoanPayBackPrediction:
+class LoanPayBack_Columns:
     def __init__(self,
                  annual_income,
                  debt_to_income_ratio,
