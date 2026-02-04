@@ -12,11 +12,13 @@ from src.constants import APP_HOST,APP_PORT
 from src.pipline.prediction_pipeline import Loan_Payback_Data_Classifier,LoanPayBack_Columns
 from src.pipline.training_pipeline import TrainingPipeline
 
+# Initialize FastAPI app
 app = FastAPI()
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# app.mount
-
-templates = Jinja2Templates()
+# Initialize Jinja2 templates
+templates = Jinja2Templates(directory="templates")
 
 origins = ["*"]
 
@@ -115,9 +117,17 @@ async def predictionRouteClient(request:Request):
         prediction = model_predictor.predict(dataframe=loan_data_df)[0]
     
         # Initialize the prediction result yes or no
-        status = "Yes" if prediction == 1 else "No"
+        # status = "Yes" if prediction == 1 else "No"
+        # Return json response
+        if prediction == 1:
+            return {"status": True, "prediction":"Loan will be paid back", "message": "Yes, the loan is likely to be paid back."}
+        else:
+            return {"status": False, "prediction": "Loan will not be paid back", "message": "No, the Loan is unlikely to be paid back."}
 
-        return templates.TemplateResponse("index.html",{"request":request,"prediction":status})
+        # return templates.TemplateResponse("index.html",{"request":request,"prediction":prediction})
 
     except Exception as e:
-        raise MyException(e,sys)
+        return {"status": None, "prediction": None, "message": str(e)}
+    
+if __name__ == "__main__":
+    app_run(app, host=APP_HOST,port=APP_PORT)
