@@ -53,17 +53,17 @@ class proj1Estimator:
             raise MyException(e, sys)
 
 
-    def predict(self,dataframe:DataFrame):
-        """
-        :param dataframe:
-        :return:
-        """
-        try:
-            if self.loaded_model is None:
-                self.loaded_model = self.load_model()
-            return self.loaded_model.predict(dataframe=dataframe)
-        except Exception as e:
-            raise MyException(e, sys)
+    # def predict(self,dataframe:DataFrame):
+    #     """
+    #     :param dataframe:
+    #     :return:
+    #     """
+    #     try:
+    #         if self.loaded_model is None:
+    #             self.loaded_model = self.load_model()
+    #         return self.loaded_model.predict(dataframe=dataframe)
+    #     except Exception as e:
+    #         raise MyException(e, sys)
         
     def predict_proba(self, X):
         """
@@ -74,6 +74,6 @@ class proj1Estimator:
         try:
             if self.loaded_model is None:
                 self.loaded_model = self.load_model()
-            return self.loaded_model.predict_proba(X)
+            return self.loaded_model.predict_proba(X = X)
         except Exception as e:
             raise MyException(e, sys)

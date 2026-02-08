@@ -100,14 +100,14 @@ class DataTransformation:
             # make copies so original dfs are not modified unexpectedly
             df = df.copy()
             # drop columns properly..
-            cols_to_drop = ["education_level", "employment_status","grade_subgrade"]
+            cols_to_drop = ["id","education_level", "employment_status","grade_subgrade"]
             cols_to_drop = [c for c in cols_to_drop if c in df.columns]
             if cols_to_drop:
                 df = df.drop(columns=cols_to_drop)
             
                 # Numerical features (kept for reference)
                 features = [
-                    'id', 'annual_income', 'debt_to_income_ratio', 'credit_score',
+                    'annual_income', 'debt_to_income_ratio', 'credit_score',
                     'loan_amount', 'interest_rate', 'loan_paid_back',
                     'income_to_loan_ratio', 'affordability_ratio', 'risk_score',
                     'subgrade_num', 'employment_stability', 'education_num'
