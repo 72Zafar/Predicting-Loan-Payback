@@ -52,18 +52,6 @@ class proj1Estimator:
         except Exception as e:
             raise MyException(e, sys)
 
-
-    # def predict(self,dataframe:DataFrame):
-    #     """
-    #     :param dataframe:
-    #     :return:
-    #     """
-    #     try:
-    #         if self.loaded_model is None:
-    #             self.loaded_model = self.load_model()
-    #         return self.loaded_model.predict(dataframe=dataframe)
-    #     except Exception as e:
-    #         raise MyException(e, sys)
         
     def predict_proba(self, X):
         """
