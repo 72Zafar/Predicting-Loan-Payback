@@ -11,6 +11,7 @@ import sys
 from src.constants import APP_HOST,APP_PORT
 from src.pipline.prediction_pipeline import Loan_Payback_Data_Classifier,LoanPayBack_Columns
 from src.pipline.training_pipeline import TrainingPipeline
+from src.logger import logging
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -19,6 +20,22 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Initialize Jinja2 templates
 templates = Jinja2Templates(directory="templates")
+
+# Global model instance (loaded once at startup)
+_model_predictor = None
+
+@app.on_event("startup")
+async def load_model_on_startup():
+    """Load model once when the application starts"""
+    global _model_predictor
+    try:
+        logging.info("Loading model at application startup...")
+        _model_predictor = Loan_Payback_Data_Classifier()
+        _model_predictor.load_and_cache_model()
+        logging.info("Model loaded successfully at startup")
+    except Exception as e:
+        logging.error(f"Error loading model at startup: {e}")
+        raise
 
 origins = ["*"]
 
@@ -110,11 +127,12 @@ async def predictionRouteClient(request:Request):
         # Convert input data to DataFrame
         loan_data_df = loan_data.loan_payback_input_data_frame()
     
-        # Initialize prediction pipeline
-        model_predictor = Loan_Payback_Data_Classifier()
+        # Use the globally cached model (loaded at startup) for prediction
+        if _model_predictor is None:
+            raise Exception("Model not loaded. Application startup may have failed.")
         
         # make prediction (blended model returns 1D array of P(class=1); use class 1 if >= 0.5)
-        proba = model_predictor.predict(dataframe=loan_data_df)
+        proba = _model_predictor.predict(dataframe=loan_data_df)
         prob_class1 = float(proba[0]) if hasattr(proba[0], "__float__") else float(proba[0][1])
         prediction = 1 if (prob_class1 >= 0.5) else 0
 
