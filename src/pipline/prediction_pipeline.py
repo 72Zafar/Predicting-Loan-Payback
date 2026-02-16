@@ -127,21 +127,48 @@ class Loan_Payback_Data_Classifier:
         """
         try:
             self.prediction_pipeline_config = prediction_pipeline_config
+            self._cached_model = None  # Cache for the loaded model
         except Exception as e:
             raise MyException(e,sys)
+    
+    def load_and_cache_model(self):
+        """
+        Load the model from S3 and cache it in memory.
+        Call this once at application startup.
+        """
+        try:
+            logging.info("Loading model from S3 and caching in memory")
+            estimator = proj1Estimator(
+                bucket_name=self.prediction_pipeline_config.model_bucket_name,
+                model_path=self.prediction_pipeline_config.model_file_path
+            )
+            self._cached_model = estimator.load_model()
+            logging.info("Model successfully cached in memory")
+        except Exception as e:
+            raise MyException(e, sys)
         
-    def predict(self,dataframe)-> str:
+    def predict(self, dataframe) -> str:
         """
         This is method of loan payback data classifier
+        Uses cached model if available, otherwise loads from S3
         return: Prediction in string format
         """
         try:
             logging.info("Entered the predict method of Loan_Payback_Data_Classifier class")
-            model = proj1Estimator(
-                bucket_name=self.prediction_pipeline_config.model_bucket_name,
-                model_path=self.prediction_pipeline_config.model_file_path
-            )
-            result = model.predict_proba(dataframe)
+            
+            # Use cached model if available
+            if self._cached_model is not None:
+                logging.info("Using cached model for prediction")
+                result = self._cached_model.predict_proba(dataframe)
+            else:
+                # Fallback: load model on demand (slower)
+                logging.info("Model not cached, loading from S3")
+                estimator = proj1Estimator(
+                    bucket_name=self.prediction_pipeline_config.model_bucket_name,
+                    model_path=self.prediction_pipeline_config.model_file_path
+                )
+                result = estimator.predict_proba(dataframe)
+            
             return result
         except Exception as e:
-            raise MyException(e,sys)
+            raise MyException(e, sys)
