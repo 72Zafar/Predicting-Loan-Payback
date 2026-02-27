@@ -1,0 +1,29 @@
+# training / artifacts
+artifacts
+catboost_info
+logs
+Loan_payBack
+.venv
+venv
+env
+# notebooks
+NoteBooks
+
+catboost_info
+logs
+# git
+.gitignore
+
+# python cache
+__pycache__
+*.pyc
+*.pyo
+
+# misc
+template.py
+demo.py
+README.md
+LICENSE
+
+sre.egg-info
+catboost_info
