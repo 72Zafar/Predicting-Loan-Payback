@@ -1,17 +1,17 @@
-Loan Payback Prediction – End-to-End MLOps Pipeline
-Problem Statement
+# Loan Payback Prediction – End-to-End MLOps Pipeline
+# **Problem Statement**
 
 Banks run marketing campaigns to offer term deposits to customers.
 The real business problem is:
 
-Which customers are likely to subscribe to a term deposit so that the bank can reduce unnecessary calls and improve campaign ROI?
+**Which customers are likely to subscribe to a term deposit so that the bank can reduce unnecessary calls and improve campaign ROI?**
 
 This project builds a full production-ready ML system to predict whether a customer will subscribe to a term deposit using historical marketing data.
 
 The project is not only about training a model.
 It focuses on building a complete, automated, and deployable ML pipeline.
 
-Dataset
+# **Dataset**
 
 The dataset comes from a Portuguese banking marketing campaign.
 Each record represents one client and their interaction history.
@@ -22,201 +22,202 @@ y → whether the client subscribed to a term deposit.
 
 The raw data is stored in MongoDB Atlas instead of local files to simulate a real production data source.
 
-What makes this project different (and not just another notebook)
+## **What makes this project different (and not just another notebook)**
 
-Most ML projects stop at:
+* Most ML projects stop at:
 
-train → evaluate → done
+  * train → evaluate → done
 
-This project continues to:
+* This project continues to:
 
-production-style data ingestion
+ * production-style data ingestion
 
-schema-based validation
+ * schema-based validation
 
-transformation pipelines
+ * transformation pipelines
 
-model registry in cloud storage
+ * model registry in cloud storage
 
-automated training and deployment
+ * automated training and deployment
 
-CI/CD and Docker
+ * CI/CD and Docker
 
-From notebook to production pipeline (what I actually did)
-1. Notebook phase (experimentation)
+# From notebook to production pipeline (what I actually did)
+## **1. Notebook phase (experimentation)**
 
-I started with a Jupyter notebook for:
+* I started with a Jupyter notebook for:
 
-exploratory data analysis
+ * exploratory data analysis
 
-feature understanding
+ * feature understanding
 
-basic preprocessing
+ * basic preprocessing
 
-model experimentation
+ * model experimentation
 
-This phase helped answer:
+* This phase helped answer:
 
-which features are useful
+ * which features are useful
 
-which columns need encoding
+ * which columns need encoding
 
-which columns contain missing or invalid values
+ * which columns contain missing or invalid values
 
 Once the logic was stable, the notebook was no longer used for training.
 
-2. Major problem I faced
+## **2. Major problem I faced**
 
-The biggest mistake I initially made:
+* The biggest mistake I initially made:
 
-I mixed data logic, validation, and modeling inside one notebook.
+ * I mixed data logic, validation, and modeling inside one notebook.
 
-This caused:
+* This caused:
 
-repeated preprocessing bugs
+ * repeated preprocessing bugs
 
-inconsistent feature ordering
+ * inconsistent feature ordering
 
-silent schema changes breaking models
+* silent schema changes breaking models
 
-3. How I fixed it
+## **3. How I fixed it**
 
 I converted the entire notebook logic into a structured pipeline with strict separation of concerns.
 
 Every step became a component.
 
-Pipeline Architecture
+## **Pipeline Architecture**
 
 The training pipeline is composed of the following components:
 
-Data Ingestion
+### **Data Ingestion**
 
-Reads raw customer data from MongoDB using a dedicated data access layer.
+  * Reads raw customer data from MongoDB using a dedicated data access layer.
 
-Converts key–value records into a structured DataFrame.
+  * Converts key–value records into a structured DataFrame.
 
-Stores raw and split datasets as artifacts.
+  * Stores raw and split datasets as artifacts.
 
-Data Validation
+ ### **Data Validation**
 
-Uses a schema file (schema.yaml) to validate:
+  * Uses a schema file (schema.yaml) to validate:
 
-column names
+  * column names
 
-data types
+  * data types
 
-presence of target column
+  * presence of target column
 
-Fails the pipeline early if the schema is violated.
+  * Fails the pipeline early if the schema is violated.
 
-This completely removed silent data bugs.
+  * This completely removed silent data bugs.
 
-Data Transformation
+### **Data Transformation**
 
-Builds preprocessing pipelines for:
+**Builds preprocessing pipelines for:**
 
-numerical features
+ * numerical features
 
-categorical features
+ * categorical features
 
-Handles:
+**Handles:**
 
-missing values
+ * missing values
 
-encoding
+ * encoding
 
-scaling
+ * scaling
 
-Saves the fitted transformer as an artifact.
+ * Saves the fitted transformer as an artifact.
 
-This ensures the same transformations are used during training and inference.
+ * This ensures the same transformations are used during training and inference.
 
-Model Trainer
+### **Model Trainer**
 
-Trains the estimator using the transformed data.
+ * Trains the estimator using the transformed data.
 
-Evaluates model performance.
+ * Evaluates model performance.
 
-Stores the trained model artifact.
+ * Stores the trained model artifact.
 
-Model Evaluation
+ ### **Model Evaluation**
 
-This stage compares the newly trained model with the previously deployed model stored in cloud storage.
+ * This stage compares the newly trained model with the previously deployed model stored in cloud storage.
 
-If the new model does not improve beyond a defined threshold, it is rejected.
+ * If the new model does not improve beyond a defined threshold, it is rejected.
 
-Model registry is implemented using Amazon Web Services S3.
+ * Model registry is implemented using Amazon Web Services S3.
 
-Model Pusher
+### **Model Pusher**
 
 If the model passes evaluation:
 
-it is pushed to the S3 model registry
+ * it is pushed to the S3 model registry
 
-it becomes the new production candidate
+ * it becomes the new production candidate
 
-Prediction Pipeline
+### **Prediction Pipeline**
 
 A separate inference pipeline is implemented that:
 
-loads the latest approved model from S3
+ * loads the latest approved model from S3
 
-loads the preprocessing object
+ * loads the preprocessing object
 
-performs prediction on new user inputs
+ * performs prediction on new user inputs
 
 The model is exposed through a web API.
 
-Why MongoDB was used
+#### **Why MongoDB was used**
 
 Instead of loading CSV files directly, the dataset is pushed into
 MongoDB Atlas and fetched dynamically.
 
 This simulates:
 
-real production data ingestion
+ * real production data ingestion
 
-database-driven pipelines
+ * database-driven pipelines
 
-decoupling of storage and training code
+ * decoupling of storage and training code
 
-Logging and exception handling
+#### **Logging and exception handling***
 
-A custom logging and exception layer was implemented and used across all components.
+ * A custom logging and exception layer was implemented and used across all components.
 
 This allowed me to:
 
-trace failures across the pipeline
+ * trace failures across the pipeline
 
-identify faulty components during CI/CD runs
+ * identify faulty components during CI/CD runs
 
-debug remote failures on the server
+ * debug remote failures on the server
 
-CI/CD and deployment
+### **CI/CD and deployment**
 
-The project is fully containerized using Docker.
+ * The project is fully containerized using Docker.
 
-The pipeline is deployed on an EC2 instance and automatically built and deployed using:
+ * The pipeline is deployed on an EC2 instance and automatically built and deployed using:
 
-GitHub Actions
+ * GitHub Actions
 
-AWS ECR
+ * AWS ECR
 
-self-hosted runner
+ * self-hosted runner
 
-Every push triggers:
+ * Every push triggers:
 
-image build
+  * image build
 
-registry push
+  * registry push
 
-deployment on the server
+  * deployment on the server
 
-How this project is structured
+#### **How this project is structured**
 
 Your structure actually follows a clean MLOps design.
 This is the part you must show clearly in your repo:
 
+```
 src/
  ├── components/
  │     ├── data_ingestion.py
@@ -244,19 +245,19 @@ src/
  ├── pipeline/
  │     ├── training_pipeline.py
  │     └── prediction_pipeline.py
-How notebook code maps to pipeline code
+```
 
+#### **How notebook code maps to pipeline code**
 Here is the part you were struggling to explain.
 
 Be very explicit in your README:
 
-Notebook responsibility	Pipeline location
-Data loading from DB	data_access/proj1_data.py
-EDA understanding	Notebook only (not part of production)
-Schema checks	components/data_validation.py
-Feature engineering & encoding	components/data_transformation.py
-Model fitting	components/model_trainer.py
-Metric comparison	components/model_evaluation.py
-Model saving	components/model_pusher.py
-
-This is exactly how professionals explain notebook → pipeline conversion.
+| Notebook responsibility        | Pipeline location                      |
+| ------------------------------ | -------------------------------------- |
+| Data loading from DB           | `data_access/proj1_data.py`            |
+| EDA understanding              | Notebook only (not part of production) |
+| Schema checks                  | `components/data_validation.py`        |
+| Feature engineering & encoding | `components/data_transformation.py`    |
+| Model fitting                  | `components/model_trainer.py`          |
+| Metric comparison              | `components/model_evaluation.py`       |
+| Model saving                   | `components/model_pusher.py`           |
